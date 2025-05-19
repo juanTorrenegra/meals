@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:meals/models/meal.dart';
 import 'package:meals/widgets/meal_item_trait.dart';
 import 'package:transparent_image/transparent_image.dart';
-import 'package:meals/screens/meal_details_screen.dart';
+import 'package:meals/screens/meal_details.dart';
 
 class MealItem extends StatelessWidget {
-  const MealItem({super.key, required this.meal}); //164
+  const MealItem({
+    super.key,
+    required this.meal,
+    required this.onSelectMeal,
+  }); //164
 
   final Meal meal;
+  final void Function(BuildContext context, Meal meal) onSelectMeal; //166
 
   String get complexityText {
     return meal.complexity.name[0].toUpperCase() +
@@ -31,16 +36,13 @@ class MealItem extends StatelessWidget {
       child: InkWell(
         //////////////////////////////////////////
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder:
-                  (ctx) => MealsDetailsScreen(
-                    title: meal.title,
-                    imageUrl: meal.imageUrl,
-                  ),
-            ),
-          );
+          onSelectMeal(context, meal);
         },
+        //onTap: () {
+        //  Navigator.of(context).push(
+        //    MaterialPageRoute(builder: (ctx) => MealsDetailsScreen(meal: meal)),
+        //  );
+        //},
         child: Stack(
           children: [
             FadeInImage(
