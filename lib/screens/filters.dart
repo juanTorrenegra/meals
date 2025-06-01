@@ -45,7 +45,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
       body: PopScope(
         canPop: false,
         onPopInvokedWithResult: (bool didPop, dynamic result) {
-          if (didPop) return; //176 returns future
+          if (didPop) return; //176 returns future(data when poping screen)
           Navigator.of(context).pop({
             Filter.glutenFree: _glutenFreeFilterSet,
             Filter.lactoseFree: _lactoseFreeFilterSet,
