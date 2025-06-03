@@ -1,30 +1,47 @@
 // tabs.dart is the main DATA MANAGEMENT WIDGET loads the all meals screen,
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
-import 'package:meals/models/meal.dart';
 
-class MealsDetailsScreen extends StatelessWidget {
+import 'package:meals/models/meal.dart';
+import 'package:meals/providers/favorites_provider.dart';
+
+class MealsDetailsScreen extends ConsumerWidget {
+  //StatelessWidget Provider()
   const MealsDetailsScreen({
     super.key,
     required this.meal,
-    required this.onToggleFavorite,
+    //required this.onToggleFavorite,
   });
 
   final Meal meal;
-  final void Function(Meal meal) onToggleFavorite;
+
+  //final void Function(Meal meal) onToggleFavorite;
   //169 7:20 this recieves the function from tabs.dart
 
-  @override
-  Widget build(BuildContext context) {
+  @override // 190 ref
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favoriteMeals = ref.watch(favoriteMealsProvider);
+
+    final isFavorite = favoriteMeals.contains(meal);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(meal.title),
         actions: [
           IconButton(
             onPressed: () {
-              onToggleFavorite(meal);
+              final wasAdded = ref
+                  .read(favoriteMealsProvider.notifier)
+                  .toggleMealFavoriteStatus(meal); //190
+              ScaffoldMessenger.of(context).clearSnackBars();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(wasAdded ? "Meal added" : "Meal removed."),
+                ),
+              );
+              //onToggleFavorite(meal);
             }, //169 8:00 sends to MealsScreen then to TabsScreen where will be managed
-            icon: const Icon(Icons.star),
+            icon: Icon(isFavorite ? Icons.star : Icons.star_border), //195
           ),
         ],
       ),
@@ -81,27 +98,3 @@ class MealsDetailsScreen extends StatelessWidget {
     );
   }
 }
-
-//juan:
-//
-//class MealsDetails extends StatelessWidget {
-//  const MealsDetails({super.key, required this.title, required this.imageUrl});
-//
-//  final String title;
-//  final String imageUrl;
-//
-//  @override
-//  Widget build(BuildContext context) {
-//    return Scaffold(
-//      appBar: AppBar(title: Text(title)),
-//      body: Column(
-//        children: [
-//          FadeInImage(
-//            placeholder: NetworkImage(imageUrl),
-//            image: NetworkImage(imageUrl),
-//          ),
-//        ],
-//      ),
-//    );
-//  }
-//}

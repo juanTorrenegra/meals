@@ -2,13 +2,12 @@
 import 'package:flutter/material.dart';
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-import 'package:meals/data/dummy_data.dart';
-import 'package:meals/models/meal.dart';
+import 'package:meals/providers/filters_provider.dart';
 import 'package:meals/screens/categories.dart';
 import 'package:meals/screens/filters.dart';
 import 'package:meals/screens/meals.dart';
 import 'package:meals/widgets/main_drawer.dart';
-import "package:meals/providers/meals_provider.dart";
+import 'package:meals/providers/favorites_provider.dart';
 
 const kInitalFilters = {
   Filter.glutenFree: false,
@@ -26,35 +25,7 @@ class TabsScreen extends ConsumerStatefulWidget {
 
 class _TabsScreenState extends ConsumerState<TabsScreen> {
   int _selectedPageIndex = 0; //168 6:57
-  final List<Meal> _favoriteMeals = [];
-  //169 [] to recieve List from MealsScreen
-  Map<Filter, bool> _selectedFilters =
-      kInitalFilters; //179 Map from filters.dart
-
-  //170 5:00 func to display _showInfoMessage msg as SnackBar
-  void _showInfoMessage(String message) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
-  }
-
-  //169 3:59 func manager
-  void _toggleMealFavoriteStatus(Meal meal) {
-    final isExisting = _favoriteMeals.contains(meal); //true or false
-
-    if (isExisting) {
-      setState(() {
-        _favoriteMeals.remove(meal); //170 setState to trigger removal inmediat
-      });
-      _showInfoMessage("Meal no longer a favorite."); //170
-    } else {
-      setState(() {
-        _favoriteMeals.add(meal);
-      });
-      _showInfoMessage("marked as favorite!"); //170
-    }
-  }
+  //final List<Meal> _favoriteMeals = []; replaced by favorites_provider.dart
 
   void _selectPage(int index) {
     setState(() {
@@ -66,54 +37,32 @@ class _TabsScreenState extends ConsumerState<TabsScreen> {
   void _setScreen(String identifier) async {
     Navigator.of(context).pop(); //close drawer so when back wont be drawr open
     if (identifier == "filters") {
-      //178 <Map<Filter, bool>> recives pop value from PopScope(filters.dart)
-      final result = await Navigator.of(context).push<Map<Filter, bool>>(
-        MaterialPageRoute(
-          builder: (ctx) => FiltersScreen(currentFilters: _selectedFilters),
-        ), //174
+      await Navigator.of(context).push<Map<Filter, bool>>(
+        MaterialPageRoute(builder: (ctx) => FiltersScreen()), //174
         //179 15:14 _selectedFilters
       );
-      setState(() {
-        _selectedFilters =
-            result ?? kInitalFilters; //179 use k as fallback value
-      });
     }
   } //push:stacks so adds back butt, pushReplacement:replaces so no back butt
 
   @override
   Widget build(BuildContext context) {
-    final meals = ref.watch(mealsProvider); //187 imp from meals_provider.dart
-    final avaliableMeals = //179
-        meals.where((meal) {
-          if (_selectedFilters[Filter.glutenFree]! && !meal.isGlutenFree) {
-            return false;
-          }
-          if (_selectedFilters[Filter.lactoseFree]! && !meal.isLactoseFree) {
-            return false;
-          }
-          if (_selectedFilters[Filter.vegetarian]! && !meal.isVegetarian) {
-            return false;
-          }
-          if (_selectedFilters[Filter.vegan]! && !meal.isVegan) {
-            return false;
-          }
-          return true;
-        }).toList();
+    final avaliableMeals = ref.watch(filteredMealsProvider);
 
     Widget activePage = CategoriesScreen(
-      onToggleFavorite: _toggleMealFavoriteStatus,
+      //onToggleFavorite: _toggleMealFavoriteStatus,---removed by provider()
       avaliableMeals: avaliableMeals, //179
     ); //use func as value
 
-    var activePageTitle = "categories";
+    var activePageTitle = "Categories";
 
     if (_selectedPageIndex == 1) {
+      final favoriteMeals = ref.watch(favoriteMealsProvider); //189
       activePage = MealsScreen(
-        meals: _favoriteMeals,
+        meals: favoriteMeals, // _favoriteMeals
         //favoriteMeals empty list at first, if star is selected the meal is sent to MealsScreen
-        onToggleFavorite: _toggleMealFavoriteStatus, //func manager
+        //onToggleFavorite: _toggleMealFavoriteStatus,---removed by provider()
       );
-      activePageTitle = "Favorites";
+      activePageTitle = "Your Favorites";
     }
 
     return Scaffold(

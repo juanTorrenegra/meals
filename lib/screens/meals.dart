@@ -8,12 +8,12 @@ class MealsScreen extends StatelessWidget {
     super.key,
     this.title,
     required this.meals,
-    required this.onToggleFavorite, //169 recibe func de meals_details.dart para ejecutar en tabs.dart
+    //required this.onToggleFavorite, //169 recibe func de meals_details.dart para ejecutar en tabs.dart
   });
 
   final String? title; //  sign ? added 168 15:12
   final List<Meal> meals; //160
-  final void Function(Meal meal) onToggleFavorite; //guarda func
+  //final void Function(Meal meal) onToggleFavorite; removed by Provider()
 
   void selectMeal(BuildContext context, Meal meal) {
     Navigator.of(context).push(
@@ -21,7 +21,7 @@ class MealsScreen extends StatelessWidget {
         builder:
             (cnx) => MealsDetailsScreen(
               meal: meal,
-              onToggleFavorite: onToggleFavorite, //func passing
+              //onToggleFavorite: onToggleFavorite, func passing - r Provider()
             ),
       ),
     );
